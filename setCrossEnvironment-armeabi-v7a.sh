@@ -1,5 +1,7 @@
 #!/bin/sh
 
+NDK_STL="libc++"
+
 IFS='
 '
 
@@ -23,7 +25,7 @@ grep "64.bit" "$NDK/RELEASE.TXT" >/dev/null 2>&1 && MYARCH="${MYARCH}_64"
 [ -z "$NDK" ] && { echo "You need Andorid NDK r8 or newer installed to run this script" ; exit 1 ; }
 GCCPREFIX=arm-linux-androideabi
 GCCVER=4.8
-PLATFORMVER=android-14
+PLATFORMVER=android-16
 LOCAL_PATH=`dirname $0`
 if which realpath > /dev/null ; then
 	LOCAL_PATH=`realpath $LOCAL_PATH`
@@ -31,6 +33,13 @@ else
 	LOCAL_PATH=`cd $LOCAL_PATH && pwd`
 fi
 ARCH=armeabi-v7a
+STL_CFLAGS="-isystem$NDK/sources/cxx-stl/gnu-libstdc++/$GCCVER/include \
+-isystem$NDK/sources/cxx-stl/gnu-libstdc++/$GCCVER/libs/$ARCH/include"
+STL_LDFLAGS="-L$NDK/sources/cxx-stl/gnu-libstdc++/$GCCVER/libs/$ARCH"
+if [[ "$NDK_STL" -eq "libc++" ]] ; then
+	STL_CFLAGS="-isystem$NDK/sources/cxx-stl/llvm-libc++/include"
+	STL_LDFLAGS="-L$NDK/sources/cxx-stl/llvm-libc++/libs/$ARCH"
+fi
 
 CFLAGS="\
 -fpic -ffunction-sections -funwind-tables -fstack-protector \
@@ -38,8 +47,7 @@ CFLAGS="\
 -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -marm -fno-omit-frame-pointer \
 -DANDROID -DNDEBUG -O2 -g -finline-functions -Wa,--noexecstack -Wformat -Werror=format-security \
 -isystem$NDK/platforms/$PLATFORMVER/arch-arm/usr/include \
--isystem$NDK/sources/cxx-stl/gnu-libstdc++/$GCCVER/include \
--isystem$NDK/sources/cxx-stl/gnu-libstdc++/$GCCVER/libs/$ARCH/include \
+$STL_CFLAGS \
 $CFLAGS"
 
 UNRESOLVED="-Wl,--no-undefined"
@@ -57,7 +65,7 @@ $SHARED \
 --sysroot=$NDK/platforms/$PLATFORMVER/arch-arm \
 -L$NDK/platforms/$PLATFORMVER/arch-arm/usr/lib \
 -lc -lm -ldl -lz \
--L$NDK/sources/cxx-stl/gnu-libstdc++/$GCCVER/libs/$ARCH \
+$STL_LDFLAGS \
 -lgnustl_static \
 -march=armv7-a -Wl,--fix-cortex-a8 \
 -no-canonical-prefixes $UNRESOLVED -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now \

@@ -11,7 +11,7 @@ NDK=`which ndk-build`
 NDK=`dirname $NDK`
 NDK=`readlink -f $NDK`
 
-for ARCH in armeabi armeabi-v7a x86 mips; do
+for ARCH in armeabi-v7a; do
 
 cd $BUILDDIR
 mkdir -p $ARCH
@@ -33,7 +33,7 @@ cd $BUILDDIR/$ARCH
 
 # =========== libiconv.so ===========
 
-[ -e libiconv.so ] || {
+true || [ -e libiconv.so ] || {
 
 	[ -e ../libiconv-1.14.tar.gz ] || curl -L http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz -o ../libiconv-1.14.tar.gz || exit 1
 
@@ -79,14 +79,14 @@ cd $BUILDDIR/$ARCH
 
 [ -e libicuuc.so ] || {
 
-	[ -e ../icu4c-52_1-src.tgz ] || curl http://pkgs.fedoraproject.org/repo/pkgs/icu/icu4c-52_1-src.tgz/9e96ed4c1d99c0d14ac03c140f9f346c/icu4c-52_1-src.tgz -o ../icu4c-52_1-src.tgz || exit 1
+	[ -e ../icu4c-55_1-src.tgz ] || exit 1
 
-	tar xvf ../icu4c-52_1-src.tgz
+	tar xvf ../icu4c-55_1-src.tgz
 
 	cd icu/source
 
-	cp -f $BUILDDIR/config.sub .
-	cp -f $BUILDDIR/config.guess .
+	#cp -f $BUILDDIR/config.sub .
+	#cp -f $BUILDDIR/config.guess .
 
 	[ -d cross ] || {
 		mkdir cross
