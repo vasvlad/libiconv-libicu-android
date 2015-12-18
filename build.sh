@@ -108,7 +108,6 @@ cd $BUILDDIR/$ARCH
 		--prefix=`pwd`/../../ \
 		--with-cross-build=`pwd`/cross \
 		--enable-static --enable-shared \
-		--with-data-packaging=archive \
 		|| exit 1
 
 	sed -i "s@^prefix *= *.*@prefix = .@" icudefs.mk || exit 1
