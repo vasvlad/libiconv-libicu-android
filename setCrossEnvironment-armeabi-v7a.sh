@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 NDK_STL="libc++"
 
@@ -36,9 +36,11 @@ ARCH=armeabi-v7a
 STL_CFLAGS="-isystem$NDK/sources/cxx-stl/gnu-libstdc++/$GCCVER/include \
 -isystem$NDK/sources/cxx-stl/gnu-libstdc++/$GCCVER/libs/$ARCH/include"
 STL_LDFLAGS="-L$NDK/sources/cxx-stl/gnu-libstdc++/$GCCVER/libs/$ARCH"
-if [[ "$NDK_STL" -eq "libc++" ]] ; then
-	STL_CFLAGS="-isystem$NDK/sources/cxx-stl/llvm-libc++/include"
+STL_LDLIB="-lgnustl_shared -lsupc++"
+if [[ "$NDK_STL" == "libc++" ]] ; then
+	STL_CFLAGS="-isystem$NDK/sources/cxx-stl/llvm-libc++/libcxx/include"
 	STL_LDFLAGS="-L$NDK/sources/cxx-stl/llvm-libc++/libs/$ARCH"
+	STL_LDLIB="-lc++_shared"
 fi
 
 CFLAGS="\
@@ -66,10 +68,9 @@ $SHARED \
 -L$NDK/platforms/$PLATFORMVER/arch-arm/usr/lib \
 -lc -lm -ldl -lz \
 $STL_LDFLAGS \
--lgnustl_static \
+$STL_LDLIB \
 -march=armv7-a -Wl,--fix-cortex-a8 \
 -no-canonical-prefixes $UNRESOLVED -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now \
--lsupc++ \
 $LDFLAGS"
 
 env PATH=$NDK/toolchains/$GCCPREFIX-$GCCVER/prebuilt/$MYARCH/bin:$LOCAL_PATH:$PATH \

@@ -101,7 +101,7 @@ cd $BUILDDIR/$ARCH
 
 	env CFLAGS="-I$NDK/sources/android/support/include -frtti -fexceptions" \
 		LDFLAGS="-frtti -fexceptions" \
-		LIBS="-L$BUILDDIR/$ARCH -landroid_support -lgnustl_static -lstdc++" \
+		LIBS="-L$BUILDDIR/$ARCH -landroid_support -lc++_shared -lstdc++" \
 		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
 		./configure \
 		--host=arm-linux-androideabi \
