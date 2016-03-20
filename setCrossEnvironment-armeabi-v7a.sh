@@ -10,7 +10,7 @@ if uname -s | grep -i "linux" > /dev/null ; then
 	MYARCH=linux-x86
 fi
 if uname -s | grep -i "darwin" > /dev/null ; then
-	MYARCH=darwin-x86
+	MYARCH=darwin-x86_64
 fi
 if uname -s | grep -i "windows" > /dev/null ; then
 	MYARCH=windows-x86
@@ -18,13 +18,13 @@ fi
 
 NDK=`which ndk-build`
 NDK=`dirname $NDK`
-NDK=`readlink -f $NDK`
+#NDK=`readlink -f $NDK`
 
 grep "64.bit" "$NDK/RELEASE.TXT" >/dev/null 2>&1 && MYARCH="${MYARCH}_64"
 
-[ -z "$NDK" ] && { echo "You need Andorid NDK r8 or newer installed to run this script" ; exit 1 ; }
+[ -z "$NDK" ] && { echo "You need Android NDK r8 or newer installed to run this script" ; exit 1 ; }
 GCCPREFIX=arm-linux-androideabi
-GCCVER=4.8
+GCCVER=4.9
 PLATFORMVER=android-16
 LOCAL_PATH=`dirname $0`
 if which realpath > /dev/null ; then
