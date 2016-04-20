@@ -5,7 +5,7 @@ IFS='
 
 MYARCH=linux-x86
 if uname -s | grep -i "linux" > /dev/null ; then
-	MYARCH=linux-x86
+	MYARCH=linux-`arch`
 fi
 if uname -s | grep -i "darwin" > /dev/null ; then
 	MYARCH=darwin-x86_64
@@ -17,8 +17,6 @@ fi
 NDK=`which ndk-build`
 NDK=`dirname $NDK`
 #NDK=`readlink -f $NDK`
-
-grep "64.bit" "$NDK/RELEASE.TXT" >/dev/null 2>&1 && MYARCH="${MYARCH}_64"
 
 [ -z "$NDK" ] && { echo "You need Android NDK r8 or newer installed to run this script" ; exit 1 ; }
 GCCPREFIX=mipsel-linux-android
