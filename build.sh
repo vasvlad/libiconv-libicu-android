@@ -24,7 +24,7 @@ mkdir -p android_support
 cd android_support
 ln -sf $NDK/sources/android/support jni
 
-ndk-build -j$NCPU APP_ABI=$ARCH || exit 1
+ndk-build -j$NCPU APP_ABI=$ARCH LIBCXX_FORCE_REBUILD=true || exit 1
 cp -f obj/local/$ARCH/libandroid_support.a ../
 
 } || exit 1
