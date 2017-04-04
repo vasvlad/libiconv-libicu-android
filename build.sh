@@ -108,6 +108,8 @@ cd $BUILDDIR/$ARCH
 		--enable-static --enable-shared \
 		|| exit 1
 
+ 	sed -i.tmp 's/.$(SO_TARGET_VERSION_MAJOR)//' icudefs.mk
+ 	sed -i.tmp 's/$(PKGDATA_VERSIONING) -e/-e/'  data/Makefile
 
 	env PATH=`pwd`:$PATH \
 		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
