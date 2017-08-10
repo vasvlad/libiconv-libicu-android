@@ -96,8 +96,6 @@ cd $BUILDDIR/$ARCH
 		cd ..
 	} || exit 1
 
-	sed -i.tmp "s@LD_SONAME *=.*@LD_SONAME =@g" config/mh-linux
-	sed -i.tmp "s%ln -s *%cp -f \$(dir \$@)/%g" config/mh-linux
 
 	env CFLAGS="-I$NDK/sources/android/support/include -frtti -fexceptions" \
 		LDFLAGS="-frtti -fexceptions" \
@@ -110,13 +108,12 @@ cd $BUILDDIR/$ARCH
 		--enable-static --enable-shared \
 		|| exit 1
 
-	sed -i.tmp "s@^prefix *= *.*@prefix = .@" icudefs.mk || exit 1
+ 	sed -i.tmp 's/.$(SO_TARGET_VERSION_MAJOR)//' icudefs.mk
+ 	sed -i.tmp 's/$(PKGDATA_VERSIONING) -e/-e/'  data/Makefile
 
 	env PATH=`pwd`:$PATH \
 		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
 		make -j$NCPU VERBOSE=1 || exit 1
-
-	sed -i.tmp "s@^prefix *= *.*@prefix = `pwd`/../../@" icudefs.mk || exit 1
 
 	env PATH=`pwd`:$PATH \
 		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
