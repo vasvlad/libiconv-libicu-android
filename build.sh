@@ -4,6 +4,8 @@ set -x
 
 export BUILDDIR=`pwd`
 
+[ -z $BUILD_ICONV] && BUILD_ICONV=TRUE
+
 NCPU=8
 uname -s | grep -i "linux" && NCPU=`cat /proc/cpuinfo | grep -c -i processor`
 
@@ -40,70 +42,71 @@ cd $BUILDDIR/$ARCH
 
 # =========== libiconv.so ===========
 
-[ -e libiconv.so ] || {
+if [ "$BUILD_ICONV" = true ]; then
+	[ -e libiconv.so ] || {
 
-	rm -rf libiconv-1.15
+		rm -rf libiconv-1.15
 
-	tar xvf ../libiconv-1.15.tar.gz
+		tar xvf ../libiconv-1.15.tar.gz
 
-	cd libiconv-1.15
+		cd libiconv-1.15
 
-	cp -f $BUILDDIR/config.sub build-aux/
-	cp -f $BUILDDIR/config.guess build-aux/
-	cp -f $BUILDDIR/config.sub libcharset/build-aux/
-	cp -f $BUILDDIR/config.guess libcharset/build-aux/
+		cp -f $BUILDDIR/config.sub build-aux/
+		cp -f $BUILDDIR/config.guess build-aux/
+		cp -f $BUILDDIR/config.sub libcharset/build-aux/
+		cp -f $BUILDDIR/config.guess libcharset/build-aux/
 
-	sed -i 's/MB_CUR_MAX/1/g' lib/loop_wchar.h
+		sed -i 's/MB_CUR_MAX/1/g' lib/loop_wchar.h
 
-	env CFLAGS="-I$NDK/sources/android/support/include -D_IO_getc=getc" \
-		LDFLAGS="-L$BUILDDIR/$ARCH -landroid_support" \
-		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
-		./configure \
-		--host=$GCCPREFIX \
-		--prefix=`pwd`/.. \
-		--enable-static --enable-shared \
-		|| exit 1
+		env CFLAGS="-I$NDK/sources/android/support/include -D_IO_getc=getc" \
+			LDFLAGS="-L$BUILDDIR/$ARCH -landroid_support" \
+			$BUILDDIR/setCrossEnvironment-$ARCH.sh \
+			./configure \
+			--host=$GCCPREFIX \
+			--prefix=`pwd`/.. \
+			--enable-static --enable-shared \
+			|| exit 1
 
-	env PATH=`pwd`:$PATH \
-		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
-		make V=1 || echo "Libtool is a miserable pile of shit, linking libcharset.so manually"
+		env PATH=`pwd`:$PATH \
+			$BUILDDIR/setCrossEnvironment-$ARCH.sh \
+			make V=1 || echo "Libtool is a miserable pile of shit, linking libcharset.so manually"
 
-	env PATH=`pwd`:$PATH \
-		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
-		sh -c '$LD $CFLAGS $LDFLAGS -shared libcharset/lib/.libs/*.o -o libcharset/lib/.libs/libcharset.so' || exit 1
+		env PATH=`pwd`:$PATH \
+			$BUILDDIR/setCrossEnvironment-$ARCH.sh \
+			sh -c '$LD $CFLAGS $LDFLAGS -shared libcharset/lib/.libs/*.o -o libcharset/lib/.libs/libcharset.so' || exit 1
 
-	env PATH=`pwd`:$PATH \
-		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
-		make V=1 || echo "Libtool works worse than cat /dev/urandom | head 10000 > library.so, because this will at least generate a target file, linking libiconv.so manually"
+		env PATH=`pwd`:$PATH \
+			$BUILDDIR/setCrossEnvironment-$ARCH.sh \
+			make V=1 || echo "Libtool works worse than cat /dev/urandom | head 10000 > library.so, because this will at least generate a target file, linking libiconv.so manually"
 
-	env PATH=`pwd`:$PATH \
-		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
-		sh -c '$LD $CFLAGS $LDFLAGS -shared lib/.libs/*.o -o lib/.libs/libiconv.so' || exit 1
+		env PATH=`pwd`:$PATH \
+			$BUILDDIR/setCrossEnvironment-$ARCH.sh \
+			sh -c '$LD $CFLAGS $LDFLAGS -shared lib/.libs/*.o -o lib/.libs/libiconv.so' || exit 1
 
-	env PATH=`pwd`:$PATH \
-		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
-		make V=1 || echo "Did you know that libtool contributes to global warming by overheating your CPU?"
+		env PATH=`pwd`:$PATH \
+			$BUILDDIR/setCrossEnvironment-$ARCH.sh \
+			make V=1 || echo "Did you know that libtool contributes to global warming by overheating your CPU?"
 
-	cp -f lib/.libs/libiconv.so preload/preloadable_libiconv.so
+		cp -f lib/.libs/libiconv.so preload/preloadable_libiconv.so
 
-	env PATH=`pwd`:$PATH \
-		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
-		make V=1 || exit 1
+		env PATH=`pwd`:$PATH \
+			$BUILDDIR/setCrossEnvironment-$ARCH.sh \
+			make V=1 || exit 1
 
-	env PATH=`pwd`:$PATH \
-		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
-		make V=1 install || exit 1
+		env PATH=`pwd`:$PATH \
+			$BUILDDIR/setCrossEnvironment-$ARCH.sh \
+			make V=1 install || exit 1
 
-	cd ..
+		cd ..
 
-	for f in libiconv libcharset; do
-		cp -f lib/$f.so ./
-		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
-			sh -c '$STRIP'" $f.so"
-	done
+		for f in libiconv libcharset; do
+			cp -f lib/$f.so ./
+			$BUILDDIR/setCrossEnvironment-$ARCH.sh \
+				sh -c '$STRIP'" $f.so"
+		done
 
-} || exit 1
-
+	} || exit 1
+fi
 # =========== libharfbuzz ===========
 
 cd $BUILDDIR/$ARCH
