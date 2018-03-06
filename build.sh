@@ -11,7 +11,7 @@ uname -s | grep -i "linux" && NCPU=`cat /proc/cpuinfo | grep -c -i processor`
 
 NDK=`which ndk-build`
 NDK=`dirname $NDK`
-NDK=`readlink -f $NDK`
+[ $(uname) = "Linux" ] && NDK=`readlink -f $NDK`
 
 export CLANG=1
 
@@ -56,7 +56,7 @@ if [ "$BUILD_ICONV" = true ]; then
 		cp -f $BUILDDIR/config.sub libcharset/build-aux/
 		cp -f $BUILDDIR/config.guess libcharset/build-aux/
 
-		sed -i 's/MB_CUR_MAX/1/g' lib/loop_wchar.h
+		sed -i.tmp 's/MB_CUR_MAX/1/g' lib/loop_wchar.h
 
 		env CFLAGS="-I$NDK/sources/android/support/include -D_IO_getc=getc" \
 			LDFLAGS="-L$BUILDDIR/$ARCH -landroid_support" \
@@ -119,7 +119,7 @@ cd $BUILDDIR/$ARCH
 	cp -f $BUILDDIR/config.sub .
 	cp -f $BUILDDIR/config.guess .
 
-	sed -i 's/ld_shlibs=no/ld_shlibs=yes/g' ./configure
+	sed -i.tmp 's/ld_shlibs=no/ld_shlibs=yes/g' ./configure
 
 	env CFLAGS="-I$NDK/sources/android/support/include -frtti -fexceptions -I$BUILDDIR/$ARCH/include" \
 		LDFLAGS="-frtti -fexceptions -L$BUILDDIR/$ARCH/lib" \
@@ -181,8 +181,8 @@ cd $BUILDDIR/$ARCH
 		cd ..
 	} || exit 1
 
-	sed -i "s@LD_SONAME *=.*@LD_SONAME =@g" config/mh-linux
-	sed -i "s%ln -s *%cp -f \$(dir \$@)/%g" config/mh-linux
+	sed -i.tmp "s@LD_SONAME *=.*@LD_SONAME =@g" config/mh-linux
+	sed -i.tmp "s%ln -s *%cp -f \$(dir \$@)/%g" config/mh-linux
 
 	env CFLAGS="-I$NDK/sources/android/support/include -frtti -fexceptions" \
 		LDFLAGS="-frtti -fexceptions -L$BUILDDIR/$ARCH/lib" \
@@ -201,13 +201,13 @@ cd $BUILDDIR/$ARCH
 #		ICULEHB_LIBS="-licu-le-hb" \
 #		--enable-layoutex \
 
-	sed -i "s@^prefix *= *.*@prefix = .@" icudefs.mk || exit 1
+	sed -i.tmp "s@^prefix *= *.*@prefix = .@" icudefs.mk || exit 1
 
 	env PATH=`pwd`:$PATH \
 		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
 		make -j$NCPU VERBOSE=1 || exit 1
 
-	sed -i "s@^prefix *= *.*@prefix = `pwd`/../../@" icudefs.mk || exit 1
+	sed -i.tmp "s@^prefix *= *.*@prefix = `pwd`/../../@" icudefs.mk || exit 1
 
 	env PATH=`pwd`:$PATH \
 		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
@@ -234,7 +234,7 @@ cd $BUILDDIR/$ARCH
 	cp -f $BUILDDIR/config.sub .
 	cp -f $BUILDDIR/config.guess .
 
-	sed -i 's/ld_shlibs=no/ld_shlibs=yes/g' ./configure
+	sed -i.tmp 's/ld_shlibs=no/ld_shlibs=yes/g' ./configure
 
 	env CFLAGS="-I$NDK/sources/android/support/include -frtti -fexceptions" \
 		CXXFLAGS="-std=c++11" \
@@ -343,13 +343,13 @@ cd $BUILDDIR/$ARCH
 		--enable-layoutex \
 		|| exit 1
 
-	sed -i "s@^prefix *= *.*@prefix = .@" icudefs.mk || exit 1
+	sed -i.tmp "s@^prefix *= *.*@prefix = .@" icudefs.mk || exit 1
 
 	env PATH=`pwd`:$PATH \
 		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
 		make -j$NCPU VERBOSE=1 || exit 1
 
-	sed -i "s@^prefix *= *.*@prefix = `pwd`/../../@" icudefs.mk || exit 1
+	sed -i.tmp "s@^prefix *= *.*@prefix = `pwd`/../../@" icudefs.mk || exit 1
 
 	env PATH=`pwd`:$PATH \
 		$BUILDDIR/setCrossEnvironment-$ARCH.sh \
